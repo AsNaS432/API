@@ -1,0 +1,545 @@
+{
+  "info": {
+    "_postman_id": "microservices-api",
+    "name": "Microservices API Collection",
+    "description": "Collection для тестирования Users и Orders микросервисов",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Users Service",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    console.log('✓ Регистрация успешна');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/v1/users/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "v1",
+                "users",
+                "register"
+              ]
+            },
+            "description": "Регистрация нового пользователя. Ожидаемый результат: 201 Created"
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('jwt_token', jsonData.token);",
+                  "    console.log('✓ Логин успешен. JWT токен сохранен');",
+                  "    console.log('Token: ' + jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/v1/users/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "v1",
+                "users",
+                "login"
+              ]
+            },
+            "description": "Авторизация пользователя и получение JWT токена. Ожидаемый результат: 200 OK с token в теле ответа"
+          },
+          "response": []
+        },
+        {
+          "name": "Register User 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user2@example.com\",\n  \"password\": \"password456\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/v1/users/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "v1",
+                "users",
+                "register"
+              ]
+            },
+            "description": "Регистрация второго пользователя для тестирования защиты от несанкционированного доступа"
+          },
+          "response": []
+        },
+        {
+          "name": "Login User 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('jwt_token_user2', jsonData.token);",
+                  "    console.log('✓ Логин User 2 успешен. JWT токен сохранен');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user2@example.com\",\n  \"password\": \"password456\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/v1/users/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "v1",
+                "users",
+                "login"
+              ]
+            },
+            "description": "Авторизация второго пользователя"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders Service",
+      "item": [
+        {
+          "name": "Create Order (User 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('order_id', jsonData.order.orderId);",
+                  "    console.log('✓ Заказ создан. Order ID: ' + jsonData.order.orderId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"productName\": \"Laptop\",\n      \"quantity\": 1,\n      \"price\": 999\n    }\n  ],\n  \"totalAmount\": 999\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/v1/orders",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "v1",
+                "orders"
+              ]
+            },
+            "description": "Создание заказа от User 1. Требует JWT токена. Ожидаемый результат: 201 Created"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Orders (User 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    console.log('✓ Получены заказы User 1. Количество: ' + jsonData.count);",
+                  "    jsonData.orders.forEach(order => {",
+                  "        console.log('  - Order #' + order.orderId + ', Status: ' + order.status);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/v1/orders",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "v1",
+                "orders"
+              ]
+            },
+            "description": "Получение списка своих заказов. Требует JWT токена. Ожидаемый результат: 200 OK с массивом заказов"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order (User 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log('✓ Заказ обновлен успешно');",
+                  "    var jsonData = pm.response.json();",
+                  "    console.log('Total Amount: ' + jsonData.order.totalAmount);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totalAmount\": 1299\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/v1/orders/{{order_id}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "v1",
+                "orders",
+                "{{order_id}}"
+              ]
+            },
+            "description": "Изменение заказа User 1. Требует JWT токена. Ожидаемый результат: 200 OK"
+          },
+          "response": []
+        },
+        {
+          "name": "Try Update Other User Order (403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 403) {",
+                  "    console.log('✓ Защита работает! User 2 не может изменить заказ User 1');",
+                  "    console.log('Ошибка: ' + pm.response.json().error);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token_user2}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totalAmount\": 500\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/v1/orders/{{order_id}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "v1",
+                "orders",
+                "{{order_id}}"
+              ]
+            },
+            "description": "Попытка User 2 изменить заказ User 1. Ожидаемый результат: 403 Forbidden"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Order (User 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    console.log('✓ Заказ отменен!');",
+                  "    console.log('Status: ' + jsonData.order.status);",
+                  "    console.log('Cancelled At: ' + jsonData.order.cancelledAt);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/v1/orders/{{order_id}}/cancel",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "v1",
+                "orders",
+                "{{order_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Отмена заказа User 1. Требует JWT токена. После отмены статус изменится на 'cancelled'. Ожидаемый результат: 200 OK"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Orders After Cancel",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/v1/orders",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "v1",
+                "orders"
+              ]
+            },
+            "description": "Проверка заказов после отмены. Заказ должен иметь статус 'cancelled'"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "API Gateway",
+      "item": [
+        {
+          "name": "Gateway Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/health",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Проверка статуса API Gateway. Ожидаемый результат: 200 OK"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Through Gateway",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user3@example.com\",\n  \"password\": \"password789\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/v1/users/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "v1",
+                "users",
+                "register"
+              ]
+            },
+            "description": "Регистрация через API Gateway. Запрос перенаправляется на Users Service (порт 3001)"
+          },
+          "response": []
+        },
+        {
+          "name": "Login Through Gateway",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user3@example.com\",\n  \"password\": \"password789\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/v1/users/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "v1",
+                "users",
+                "login"
+              ]
+            },
+            "description": "Авторизация через API Gateway. Запрос перенаправляется на Users Service"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token_user2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "order_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

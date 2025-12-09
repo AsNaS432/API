@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  users-service:
+    build:
+      context: ./users-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+    # add more configuration as needed
+
+  orders-service:
+    build:
+      context: ./orders-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=development
+    # add more configuration as needed
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - users-service
+      - orders-service
+    # add more configuration as needed
